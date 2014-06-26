@@ -4,7 +4,7 @@
 // found in the LICENSE file.
 
 /**
- * Discovery services for applications.
+ * Service discovery framework for dart applications.
  */
 library eureka;
 

@@ -15,9 +15,6 @@ final Logger _LOGGER = new Logger('eureka.etcd');
 
 /**
  * An etcd implementation of [Discovery].
- * 
- * 
- * TODO Should we prevent delisting of services by someone other than the publisher?
  */
 class EtcdDiscovery implements Discovery {
 
