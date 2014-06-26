@@ -122,14 +122,20 @@ _shouldWatchListings() {
   var labels = {
     'environment': 'prod'
   };
+  
+  var location1 = Uri.parse('tcp://127.0.0.1:6000');
+  
+  schedule(() {
+      eureka.list(location1, labels);
+    });
 
   var eventsReady = new Completer();
 
   schedule(() {
     var sub;
-    sub = eureka.watch(labels).listen((e) {
+    sub = eureka.watch(labels:labels).listen((e) {
       events.add(e);
-      if (events.length == 1) {
+      if (events.length == 2) {
         sub.cancel();
         eventsReady.complete(events);
       }
@@ -139,18 +145,20 @@ _shouldWatchListings() {
     return new Future.delayed(new Duration(seconds: 1));
   });
 
-  var location = Uri.parse('tcp://127.0.0.1:6000');
+  var location2 = Uri.parse('tcp://127.0.0.2:6000');
   
   schedule(() {
-    eureka.list(location, labels);
+    eureka.list(location2, labels);
   });
 
   schedule(() {
     var completer = new Completer();
     eventsReady.future.then((e) {
-      expect(events.length, equals(1));
+      expect(events.length, equals(2));
       expect(events[0].type, equals(ListingEventType.ADDED));
-      expect(events[0].listing.location, equals(location));
+      expect(events[0].listing.location, equals(location1));
+      expect(events[1].type, equals(ListingEventType.ADDED));
+      expect(events[1].listing.location, equals(location2));
       completer.complete();
     }).catchError((e, ss) {
       completer.completeError(e, ss);

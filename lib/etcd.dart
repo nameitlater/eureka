@@ -77,17 +77,51 @@ class EtcdEureka implements Eureka {
   }
 
   @override
-  Stream<ListingEvent> watch(Map<String, String> labels) {
-    return _events.stream.where((ListingEvent e) {
-      var matches = true;
-      for (var key in labels.keys) {
-        if (!e.listing.labels.containsKey(key) || e.listing.labels[key] != labels[key]) {
-          matches = false;
-          break;
+  Stream<ListingEvent> watch({Map<String, String> labels: const {}, bool discover: true}) {
+    if (discover) {
+      StreamController controller;
+      bool first = true;
+      var sub;
+      controller = new StreamController(onListen: () {
+        if (first) {
+          first = false;
+          _client.getNode(_path).then((node) {
+            node.nodes.forEach((n) {
+              controller.add(new ListingEvent(ListingEventType.ADDED, _nodeToListing(n)));
+            });
+          }).catchError((e, ss) {
+            controller.addError(e, ss);
+          });
         }
+        sub =_events.stream.where((ListingEvent e) {
+          return _matches(labels, e);
+        }).listen((e) {
+          controller.add(e);
+        });
+      }, onCancel: () {
+        if(sub != null){
+          sub.cancel();
+        }
+      });
+
+      return controller.stream;
+    } else {
+      return _events.stream.where((ListingEvent e) {
+        return _matches(labels, e);
+      });
+    }
+
+  }
+
+  static bool _matches(Map<String, String> labels, ListingEvent e) {
+    var matches = true;
+    for (var key in labels.keys) {
+      if (!e.listing.labels.containsKey(key) || e.listing.labels[key] != labels[key]) {
+        matches = false;
+        break;
       }
-      return matches;
-    });
+    }
+    return matches;
   }
 
   _observed() {

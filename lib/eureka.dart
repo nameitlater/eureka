@@ -124,8 +124,10 @@ abstract class Eureka {
    * Watch for services matching [labels].
    * 
    * Returns a [Stream] of [ListingEvent]'s for [Listing]'s that match [labels].
+   * 
+   *  * includes currently listed services in the stream if [discover] is true
    */
-  Stream<ListingEvent> watch(Map<String, String> labels);
+  Stream<ListingEvent> watch({Map<String, String> labels : const {}, bool discover:true});
   
   /**
    * Close the service and release all resources.
