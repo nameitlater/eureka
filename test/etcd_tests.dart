@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'package:ezetcd/ezetcd.dart';
 import 'package:eureka/eureka.dart';
+import 'package:eureka/etcd.dart';
 import 'package:scheduled_test/scheduled_test.dart';
 
 const String TEST_DIRECTORY = '/eureka_tests';
@@ -42,7 +43,7 @@ _shouldTeardown() {
 
 _shouldListService() {
 
-  var discovery = new EtcdDiscovery(path: TEST_DIRECTORY + '/services');
+  var eureka = new EtcdEureka(path: TEST_DIRECTORY + '/services');
 
   var location = Uri.parse('tcp://127.0.0.1:6000');
   var labels = {
@@ -50,19 +51,19 @@ _shouldListService() {
   };
 
   schedule(() {
-    return discovery.list(location, labels);
+    return eureka.list(location, labels);
   }).then((ListingEvent le) {
     expect(le.type, equals(ListingEventType.ADDED));
     expect(le.listing.location, equals(location));
     expect(le.listing.labels, equals(labels));
   }).whenComplete(() {
-    discovery.close();
+    eureka.close();
   });
 }
 
 _shouldUpdateListing() {
 
-  var discovery = new EtcdDiscovery(path: TEST_DIRECTORY + '/services');
+  var eureka = new EtcdEureka(path: TEST_DIRECTORY + '/services');
 
   var location = Uri.parse('tcp://127.0.0.1:6000');
   var labels = {
@@ -70,27 +71,27 @@ _shouldUpdateListing() {
   };
 
   schedule(() {
-    return discovery.list(location, labels);
+    return eureka.list(location, labels);
   });
 
 
 
   schedule(() {
     labels['environment'] = 'test';
-    return discovery.list(location, labels);
+    return eureka.list(location, labels);
   }).then((ListingEvent le) {
     expect(le.type, equals(ListingEventType.MODIFIED));
     expect(le.listing.location, equals(location));
     expect(le.listing.labels, equals(labels));
   }).whenComplete(() {
-    discovery.close();
+    eureka.close();
   });
 
 }
 
 _shouldDeleteListing() {
 
-  var discovery = new EtcdDiscovery(path: TEST_DIRECTORY + '/services');
+  var eureka = new EtcdEureka(path: TEST_DIRECTORY + '/services');
 
   var location = Uri.parse('tcp://127.0.0.1:6000');
   var labels = {
@@ -98,23 +99,23 @@ _shouldDeleteListing() {
   };
 
   schedule(() {
-    return discovery.list(location, labels);
+    return eureka.list(location, labels);
   });
 
   schedule(() {
-    return discovery.delist(location);
+    return eureka.delist(location);
   }).then((ListingEvent le) {
     expect(le.type, equals(ListingEventType.REMOVED));
     expect(le.listing.location, equals(location));
     expect(le.listing.labels, equals(labels));
   }).whenComplete(() {
-    discovery.close();
+    eureka.close();
   });
 
 }
 
 _shouldWatchListings() {
-  var discovery = new EtcdDiscovery(path: TEST_DIRECTORY + '/services');
+  var eureka = new EtcdEureka(path: TEST_DIRECTORY + '/services');
 
   var events = [];
 
@@ -126,7 +127,7 @@ _shouldWatchListings() {
 
   schedule(() {
     var sub;
-    sub = discovery.watch(labels).listen((e) {
+    sub = eureka.watch(labels).listen((e) {
       events.add(e);
       if (events.length == 1) {
         sub.cancel();
@@ -141,7 +142,7 @@ _shouldWatchListings() {
   var location = Uri.parse('tcp://127.0.0.1:6000');
   
   schedule(() {
-    discovery.list(location, labels);
+    eureka.list(location, labels);
   });
 
   schedule(() {
@@ -156,7 +157,7 @@ _shouldWatchListings() {
     });
     return completer.future;
   }).whenComplete(() {
-    discovery.close();
+    eureka.close();
   });
 
 

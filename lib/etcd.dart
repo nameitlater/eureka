@@ -3,20 +3,20 @@
 // source code is governed by the BSD 3 Clause license, a copy of which can be
 // found in the LICENSE file.
 
-library eureka.src.etcd;
+library etcd_eureka;
 
 import 'dart:async';
 import 'dart:convert';
-import 'discovery.dart';
+import 'eureka.dart';
 import 'package:logging/logging.dart';
 import 'package:ezetcd/ezetcd.dart';
 
 final Logger _LOGGER = new Logger('eureka.etcd');
 
 /**
- * An etcd implementation of [Discovery].
+ * An etcd implementation of [Eureka].
  */
-class EtcdDiscovery implements Discovery {
+class EtcdEureka implements Eureka {
 
   final EtcdClient _client;
   final String _path;
@@ -24,7 +24,7 @@ class EtcdDiscovery implements Discovery {
   StreamController<ListingEvent> _events;
   StreamSubscription _watchSub;
 
-  EtcdDiscovery({host: '127.0.0.1', port: 4001, path: '/services'})
+  EtcdEureka({host: '127.0.0.1', port: 4001, path: '/services'})
       : this._path = path,
         this._client = new EtcdClient(host: host, port: port) {
     _events = new StreamController.broadcast(onListen: _observed, onCancel: _unobserved);
