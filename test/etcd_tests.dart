@@ -44,16 +44,16 @@ _shouldListService() {
 
   var discovery = new EtcdDiscovery(path: TEST_DIRECTORY + '/services');
 
-  var uri = Uri.parse('tcp://127.0.0.1:6000');
+  var location = Uri.parse('tcp://127.0.0.1:6000');
   var labels = {
     'environment': 'prod'
   };
 
   schedule(() {
-    return discovery.list(uri, labels);
+    return discovery.list(location, labels);
   }).then((ListingEvent le) {
     expect(le.type, equals(ListingEventType.ADDED));
-    expect(le.listing.uri, equals(uri));
+    expect(le.listing.location, equals(location));
     expect(le.listing.labels, equals(labels));
   }).whenComplete(() {
     discovery.close();
@@ -64,23 +64,23 @@ _shouldUpdateListing() {
 
   var discovery = new EtcdDiscovery(path: TEST_DIRECTORY + '/services');
 
-  var uri = Uri.parse('tcp://127.0.0.1:6000');
+  var location = Uri.parse('tcp://127.0.0.1:6000');
   var labels = {
     'environment': 'prod'
   };
 
   schedule(() {
-    return discovery.list(uri, labels);
+    return discovery.list(location, labels);
   });
 
 
 
   schedule(() {
     labels['environment'] = 'test';
-    return discovery.list(uri, labels);
+    return discovery.list(location, labels);
   }).then((ListingEvent le) {
     expect(le.type, equals(ListingEventType.MODIFIED));
-    expect(le.listing.uri, equals(uri));
+    expect(le.listing.location, equals(location));
     expect(le.listing.labels, equals(labels));
   }).whenComplete(() {
     discovery.close();
@@ -92,20 +92,20 @@ _shouldDeleteListing() {
 
   var discovery = new EtcdDiscovery(path: TEST_DIRECTORY + '/services');
 
-  var uri = Uri.parse('tcp://127.0.0.1:6000');
+  var location = Uri.parse('tcp://127.0.0.1:6000');
   var labels = {
     'environment': 'prod'
   };
 
   schedule(() {
-    return discovery.list(uri, labels);
+    return discovery.list(location, labels);
   });
 
   schedule(() {
-    return discovery.delist(uri);
+    return discovery.delist(location);
   }).then((ListingEvent le) {
     expect(le.type, equals(ListingEventType.REMOVED));
-    expect(le.listing.uri, equals(uri));
+    expect(le.listing.location, equals(location));
     expect(le.listing.labels, equals(labels));
   }).whenComplete(() {
     discovery.close();
@@ -138,10 +138,10 @@ _shouldWatchListings() {
     return new Future.delayed(new Duration(seconds: 1));
   });
 
-  var uri = Uri.parse('tcp://127.0.0.1:6000');
+  var location = Uri.parse('tcp://127.0.0.1:6000');
   
   schedule(() {
-    discovery.list(uri, labels);
+    discovery.list(location, labels);
   });
 
   schedule(() {
@@ -149,7 +149,7 @@ _shouldWatchListings() {
     eventsReady.future.then((e) {
       expect(events.length, equals(1));
       expect(events[0].type, equals(ListingEventType.ADDED));
-      expect(events[0].listing.uri, equals(uri));
+      expect(events[0].listing.location, equals(location));
       completer.complete();
     }).catchError((e, ss) {
       completer.completeError(e, ss);

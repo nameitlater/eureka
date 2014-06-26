@@ -41,9 +41,9 @@ class ListingEventType {
 class Listing {
   
   /**
-   *The uri used to connect to the service.
+   *The location used to connect to the service.
    */
-  final Uri uri;
+  final Uri location;
   
   /**
    * Labels describing the service.
@@ -54,10 +54,10 @@ class Listing {
    * The expiration time of the listing
    */
   final DateTime expiration;
-  Listing(this.uri, this.labels, {DateTime expiration}) : this.expiration = expiration;
+  Listing(this.location, this.labels, {DateTime expiration}) : this.expiration = expiration;
   
   String toString(){
-    return '{"uri": ${uri}, "labels": $labels} "expiration": $expiration';
+    return '{"location": ${location}, "labels": $labels} "expiration": $expiration';
   }
 }
 
@@ -92,18 +92,18 @@ class ListingEvent {
 abstract class Discovery {
   
   /**
-   * Removes the [Listing] for [uri]
+   * Removes the [Listing] for [location]
    * 
    * Returns a [Future] which completes with the [ListingEvent] that results from
-   * delisting the service represented by [uri].
+   * delisting the service at [location].
    */
-  Future<ListingEvent> delist(Uri uri);
+  Future<ListingEvent> delist(Uri location);
   
   /**
-   * Lists the service represented by [uri].
+   * Lists the service represented by [location].
    * 
    * Returns a [Future] which completes with the [ListingEvent] that results from
-   * listing the service represented by [uri] for the [ttl].  
+   * listing the service at [location] for the [ttl].  
    * 
    *  * The [labels] given will be matched against in [discover] and [watch].
    *  
@@ -111,7 +111,7 @@ abstract class Discovery {
    * 
    *  * The [Listing] is be extended by calling [list] again. 
    */
-  Future<ListingEvent> list(Uri uri, Map<String, String> labels, {Duration ttl});
+  Future<ListingEvent> list(Uri location, Map<String, String> labels, {Duration ttl});
   
   /**
    * Discover services that match [labels].

@@ -38,10 +38,10 @@ class EtcdDiscovery implements Discovery {
   }
 
   @override
-  Future<ListingEvent> list(Uri uri, Map<String, String> labels, {Duration ttl}) {
+  Future<ListingEvent> list(Uri location, Map<String, String> labels, {Duration ttl}) {
     var completer = new Completer();
-    _client.setNode(_uriToKey(_path, uri), value: JSON.encode({
-      'uri': uri.toString(),
+    _client.setNode(_locationToKey(_path, location), value: JSON.encode({
+      'location': location.toString(),
       'labels': labels
     })).then((NodeEvent ne) {
       completer.complete(_nodeEventToListingEvent(ne));
@@ -65,9 +65,9 @@ class EtcdDiscovery implements Discovery {
   }
 
   @override
-  Future<ListingEvent> delist(Uri uri) {
+  Future<ListingEvent> delist(Uri location) {
     var completer = new Completer();
-    _client.deleteNode(_uriToKey(_path, uri)).then((NodeEvent ne) {
+    _client.deleteNode(_locationToKey(_path, location)).then((NodeEvent ne) {
       var json = JSON.decode(ne.oldValue.value);
       completer.complete(_nodeEventToListingEvent(ne));
     }).catchError((e, ss) {
@@ -106,23 +106,23 @@ class EtcdDiscovery implements Discovery {
     switch (e.type) {
       case NodeEventType.CREATED:
         var json = JSON.decode(e.newValue.value);
-        return new ListingEvent(ListingEventType.ADDED, new Listing(Uri.parse(json['uri']), json['labels'], expiration: e.newValue.expiration));
+        return new ListingEvent(ListingEventType.ADDED, new Listing(Uri.parse(json['location']), json['labels'], expiration: e.newValue.expiration));
       case NodeEventType.MODIFIED:
         var json = JSON.decode(e.newValue.value);
-        return new ListingEvent(ListingEventType.MODIFIED, new Listing(Uri.parse(json['uri']), json['labels'], expiration: e.newValue.expiration));
+        return new ListingEvent(ListingEventType.MODIFIED, new Listing(Uri.parse(json['location']), json['labels'], expiration: e.newValue.expiration));
       default:
         var json = JSON.decode(e.oldValue.value);
-        return new ListingEvent(ListingEventType.REMOVED, new Listing(Uri.parse(json['uri']), json['labels'], expiration: e.oldValue.expiration));
+        return new ListingEvent(ListingEventType.REMOVED, new Listing(Uri.parse(json['location']), json['labels'], expiration: e.oldValue.expiration));
     }
   }
 
   _nodeToListing(Node n) {
     var json = JSON.decode(n.value);
-    return new Listing(Uri.parse(json['uri']), json['labels'], expiration: n.expiration);
+    return new Listing(Uri.parse(json['location']), json['labels'], expiration: n.expiration);
   }
 
-  static String _uriToKey(String path, Uri uri) {
-    return '$path/${uri.scheme}_${uri.authority}_${uri.path}';
+  static String _locationToKey(String path, Uri location) {
+    return '$path/${location.scheme}_${location.authority}_${location.path}';
   }
 
 }
