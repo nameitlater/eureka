@@ -14,7 +14,7 @@ Eureka currently supports [etcd](https://github.com/coreos/etcd) as a backend.
 
 ```
 
-  var discovery = new EtcdDiscovery(path: TEST_DIRECTORY + '/services');
+  var eureka = new EtcdEureka(path: TEST_DIRECTORY + '/services');
 
   var uri = Uri.parse('tcp://127.0.0.1:6000');
   var labels = {
@@ -22,13 +22,13 @@ Eureka currently supports [etcd](https://github.com/coreos/etcd) as a backend.
   };
 
   schedule(() {
-    return discovery.list(uri, labels);
+    return eureka.list(uri, labels);
   }).then((ListingEvent le) {
     expect(le.type, equals(ListingEventType.ADDED));
     expect(le.listing.uri, equals(uri));
     expect(le.listing.labels, equals(labels));
   }).whenComplete(() {
-    discovery.close();
+    eureka.close();
   });
 
 
