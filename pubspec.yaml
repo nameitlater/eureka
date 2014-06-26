@@ -1,7 +1,7 @@
 name: eureka
 version: 0.0.1
 author: Name It Later
-description: Service discovery for applications.
+description: Service discovery framework.
 homepage: https://www.github.com/nameitlater/eureka
 documentation: https://www.github.com/nameitlater/eureka
 environment:
